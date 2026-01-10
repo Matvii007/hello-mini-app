@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mini Tracker</title>
+  <title>Demo App</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    * { box-sizing: border-box; }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -20,128 +22,196 @@
     .app {
       max-width: 420px;
       margin: 0 auto;
-      padding: 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 26px;
-    }
-
-    .status {
-      margin: 15px 0;
-      font-size: 18px;
-    }
-
-    .counter {
-      font-size: 40px;
+    header {
+      padding: 16px;
+      font-size: 20px;
       font-weight: bold;
-      margin: 10px 0;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 12px;
+      background: #f5f5f7;
+      margin-bottom: 16px;
+    }
+
+    .big {
+      font-size: 36px;
+      font-weight: bold;
     }
 
     button {
       width: 100%;
       padding: 14px;
-      font-size: 18px;
-      border: none;
       border-radius: 10px;
+      border: none;
       background: #007aff;
-      color: #fff;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    button:active {
-      opacity: 0.85;
-    }
+    button:active { opacity: 0.85; }
 
-    .chart {
-      margin-top: 30px;
-    }
-
-    .bar {
-      height: 16px;
-      background: #007aff;
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #ddd;
       border-radius: 6px;
-      margin-bottom: 8px;
+      overflow: hidden;
+      margin-top: 8px;
     }
 
-    .label {
+    .progress {
+      height: 100%;
+      background: #007aff;
+      width: 0%;
+    }
+
+    .achievement {
+      padding: 10px;
+      border-radius: 8px;
+      background: #e0e0e0;
+      margin-bottom: 8px;
       font-size: 14px;
-      margin-bottom: 4px;
+    }
+
+    .achievement.active {
+      background: #007aff;
+      color: white;
+    }
+
+    nav {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+
+    nav button {
+      flex: 1;
+      border-radius: 0;
+      background: none;
+      color: #666;
+      font-size: 14px;
+    }
+
+    nav button.active {
+      color: #007aff;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="app">
-    <h1>Daily Tracker</h1>
+<div class="app">
+  <header id="header">Home</header>
 
-    <div class="status">Times today:</div>
-    <div class="counter" id="count">0</div>
+  <main>
+    <!-- HOME -->
+    <div class="tab active" id="home">
+      <div class="card">
+        <div>Points</div>
+        <div class="big" id="points">0</div>
+      </div>
 
-    <button id="btn">I feel an urge</button>
-
-    <div class="chart">
-      <h2 style="font-size:18px;">Today activity</h2>
-      <div id="bars"></div>
+      <div class="card">
+        <button id="actionBtn">I did a good action</button>
+      </div>
     </div>
-  </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    tg.setBackgroundColor('#ffffff');
-    tg.setHeaderColor('#ffffff');
+    <!-- PROGRESS -->
+    <div class="tab" id="progress">
+      <div class="card">
+        <div>Daily progress</div>
+        <div class="progress-bar">
+          <div class="progress" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
 
-    const STORAGE_KEY = 'daily_events';
+    <!-- ACHIEVEMENTS -->
+    <div class="tab" id="achievements">
+      <div class="achievement" id="a1">First step (10 pts)</div>
+      <div class="achievement" id="a2">Getting started (50 pts)</div>
+      <div class="achievement" id="a3">Consistency (100 pts)</div>
+    </div>
+  </main>
 
-    function getData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    }
+  <nav>
+    <button class="active" data-tab="home">Home</button>
+    <button data-tab="progress">Progress</button>
+    <button data-tab="achievements">Achievements</button>
+  </nav>
+</div>
 
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+  tg.setBackgroundColor('#ffffff');
+  tg.setHeaderColor('#ffffff');
 
-    function today() {
-      return new Date().toISOString().slice(0, 10);
-    }
+  const state = JSON.parse(localStorage.getItem('demo_state')) || {
+    points: 0
+  };
 
-    function render() {
-      const data = getData().filter(d => d.date === today());
-      document.getElementById('count').innerText = data.length;
+  const pointsEl = document.getElementById('points');
+  const progressFill = document.getElementById('progressFill');
 
-      const bars = document.getElementById('bars');
-      bars.innerHTML = '';
+  function save() {
+    localStorage.setItem('demo_state', JSON.stringify(state));
+  }
 
-      data.forEach((item, index) => {
-        const label = document.createElement('div');
-        label.className = 'label';
-        label.innerText = item.time;
+  function render() {
+    pointsEl.innerText = state.points;
+    progressFill.style.width = Math.min(100, state.points) + '%';
 
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.width = Math.min(100, 20 + index * 10) + '%';
+    document.getElementById('a1').classList.toggle('active', state.points >= 10);
+    document.getElementById('a2').classList.toggle('active', state.points >= 50);
+    document.getElementById('a3').classList.toggle('active', state.points >= 100);
+  }
 
-        bars.appendChild(label);
-        bars.appendChild(bar);
-      });
-    }
-
-    document.getElementById('btn').addEventListener('click', () => {
-      const data = getData();
-      data.push({
-        date: today(),
-        time: new Date().toLocaleTimeString()
-      });
-      saveData(data);
-      render();
-    });
-
+  document.getElementById('actionBtn').onclick = () => {
+    state.points += 10;
+    save();
     render();
-  </script>
+  };
+
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(btn.dataset.tab).classList.add('active');
+
+      document.getElementById('header').innerText =
+        btn.dataset.tab.charAt(0).toUpperCase() + btn.dataset.tab.slice(1);
+    };
+  });
+
+  render();
+</script>
 
 </body>
 </html>
