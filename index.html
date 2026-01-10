@@ -1,217 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Demo App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NoSmoke</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <style>
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-      color: #000;
-    }
-
-    .app {
-      max-width: 420px;
-      margin: 0 auto;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      padding: 16px;
-      font-size: 20px;
-      font-weight: bold;
-      text-align: center;
-      border-bottom: 1px solid #eee;
-    }
-
-    main {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-    }
-
-    .tab {
-      display: none;
-    }
-
-    .tab.active {
-      display: block;
-    }
-
-    .card {
-      padding: 16px;
-      border-radius: 12px;
-      background: #f5f5f7;
-      margin-bottom: 16px;
-    }
-
-    .big {
-      font-size: 36px;
-      font-weight: bold;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      background: #007aff;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:active { opacity: 0.85; }
-
-    .progress-bar {
-      width: 100%;
-      height: 12px;
-      background: #ddd;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .progress {
-      height: 100%;
-      background: #007aff;
-      width: 0%;
-    }
-
-    .achievement {
-      padding: 10px;
-      border-radius: 8px;
-      background: #e0e0e0;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .achievement.active {
-      background: #007aff;
-      color: white;
-    }
-
-    nav {
-      display: flex;
-      border-top: 1px solid #eee;
-    }
-
-    nav button {
-      flex: 1;
-      border-radius: 0;
-      background: none;
-      color: #666;
-      font-size: 14px;
-    }
-
-    nav button.active {
-      color: #007aff;
-      font-weight: bold;
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;height:100%;
+  background:#f6f7f9;
+  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+}
+.app{
+  max-width:430px;margin:0 auto;height:100%;
+  display:flex;flex-direction:column;
+}
+header{
+  padding:14px;text-align:center;
+  font-weight:600;font-size:18px;
+  background:#fff;border-bottom:1px solid #eee;
+}
+main{flex:1;overflow-y:auto;padding:16px}
+.card{
+  background:#fff;border-radius:16px;
+  padding:16px;margin-bottom:16px;
+}
+.big{font-size:34px;font-weight:700}
+.small{font-size:14px;color:#666}
+button.primary{
+  width:100%;padding:14px;
+  border-radius:14px;border:none;
+  background:#ff3b30;color:#fff;
+  font-size:17px;font-weight:600;
+}
+.progress{
+  height:12px;background:#eee;border-radius:6px;overflow:hidden;margin-top:8px
+}
+.progress-fill{
+  height:100%;background:#4cd964;width:0%
+}
+.list-item{
+  padding:12px 0;border-bottom:1px solid #eee;font-size:15px
+}
+.ach{
+  padding:12px;border-radius:12px;
+  background:#eee;margin-bottom:8px
+}
+.ach.active{background:#4cd964;color:#fff}
+nav{
+  display:flex;border-top:1px solid #eee;background:#fff
+}
+nav button{
+  flex:1;padding:10px;
+  border:none;background:none;
+  font-size:12px;color:#888
+}
+nav button.active{color:#007aff;font-weight:600}
+.tab{display:none}
+.tab.active{display:block}
+</style>
 </head>
+
 <body>
-
 <div class="app">
-  <header id="header">Home</header>
+<header id="title">Today</header>
 
-  <main>
-    <!-- HOME -->
-    <div class="tab active" id="home">
-      <div class="card">
-        <div>Points</div>
-        <div class="big" id="points">0</div>
-      </div>
+<main>
+<!-- TODAY -->
+<div class="tab active" id="today">
+  <div class="card">
+    <div class="small">Time since last cigarette</div>
+    <div class="big" id="timer">0 min</div>
+  </div>
+  <div class="card">
+    <button class="primary" id="urgeBtn">I want to smoke</button>
+  </div>
+  <div class="card">
+    <div class="small">Points</div>
+    <div class="big" id="points">0</div>
+  </div>
+</div>
 
-      <div class="card">
-        <button id="actionBtn">I did a good action</button>
-      </div>
-    </div>
+<!-- PROGRESS -->
+<div class="tab" id="progress">
+  <div class="card">
+    <div class="small">Daily progress</div>
+    <div class="progress"><div class="progress-fill" id="dailyFill"></div></div>
+  </div>
+</div>
 
-    <!-- PROGRESS -->
-    <div class="tab" id="progress">
-      <div class="card">
-        <div>Daily progress</div>
-        <div class="progress-bar">
-          <div class="progress" id="progressFill"></div>
-        </div>
-      </div>
-    </div>
+<!-- TRIGGERS -->
+<div class="tab" id="triggers">
+  <div class="card" id="triggerList"></div>
+</div>
 
-    <!-- ACHIEVEMENTS -->
-    <div class="tab" id="achievements">
-      <div class="achievement" id="a1">First step (10 pts)</div>
-      <div class="achievement" id="a2">Getting started (50 pts)</div>
-      <div class="achievement" id="a3">Consistency (100 pts)</div>
-    </div>
-  </main>
+<!-- ACHIEVEMENTS -->
+<div class="tab" id="achievements">
+  <div class="ach" id="a1">First urge logged</div>
+  <div class="ach" id="a2">10 urges resisted</div>
+  <div class="ach" id="a3">100 points</div>
+</div>
 
-  <nav>
-    <button class="active" data-tab="home">Home</button>
-    <button data-tab="progress">Progress</button>
-    <button data-tab="achievements">Achievements</button>
-  </nav>
+<!-- PROFILE -->
+<div class="tab" id="profile">
+  <div class="card">
+    <div class="small">Smoke-free days</div>
+    <div class="big" id="days">0</div>
+  </div>
+  <div class="card">
+    <button onclick="reset()">Reset data</button>
+  </div>
+</div>
+</main>
+
+<nav>
+<button class="active" data-tab="today">Today</button>
+<button data-tab="progress">Progress</button>
+<button data-tab="triggers">Triggers</button>
+<button data-tab="achievements">Awards</button>
+<button data-tab="profile">Profile</button>
+</nav>
 </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-  tg.setBackgroundColor('#ffffff');
-  tg.setHeaderColor('#ffffff');
+const tg=window.Telegram.WebApp;
+tg.ready();tg.expand();tg.setBackgroundColor('#f6f7f9');tg.setHeaderColor('#ffffff');
 
-  const state = JSON.parse(localStorage.getItem('demo_state')) || {
-    points: 0
-  };
+let state=JSON.parse(localStorage.getItem('nosmoke'))||{
+  points:0,
+  urges:[],
+  start:Date.now()
+};
 
-  const pointsEl = document.getElementById('points');
-  const progressFill = document.getElementById('progressFill');
+function save(){localStorage.setItem('nosmoke',JSON.stringify(state))}
 
-  function save() {
-    localStorage.setItem('demo_state', JSON.stringify(state));
-  }
+function render(){
+  document.getElementById('points').innerText=state.points;
+  document.getElementById('dailyFill').style.width=Math.min(100,state.points)+'%';
+  document.getElementById('a1').classList.toggle('active',state.urges.length>=1);
+  document.getElementById('a2').classList.toggle('active',state.urges.length>=10);
+  document.getElementById('a3').classList.toggle('active',state.points>=100);
 
-  function render() {
-    pointsEl.innerText = state.points;
-    progressFill.style.width = Math.min(100, state.points) + '%';
-
-    document.getElementById('a1').classList.toggle('active', state.points >= 10);
-    document.getElementById('a2').classList.toggle('active', state.points >= 50);
-    document.getElementById('a3').classList.toggle('active', state.points >= 100);
-  }
-
-  document.getElementById('actionBtn').onclick = () => {
-    state.points += 10;
-    save();
-    render();
-  };
-
-  document.querySelectorAll('nav button').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(btn.dataset.tab).classList.add('active');
-
-      document.getElementById('header').innerText =
-        btn.dataset.tab.charAt(0).toUpperCase() + btn.dataset.tab.slice(1);
-    };
+  const list=document.getElementById('triggerList');
+  list.innerHTML='';
+  state.urges.slice(-5).reverse().forEach(u=>{
+    const d=document.createElement('div');
+    d.className='list-item';
+    d.innerText=u;
+    list.appendChild(d);
   });
+}
 
-  render();
+document.getElementById('urgeBtn').onclick=()=>{
+  state.points+=10;
+  state.urges.push(new Date().toLocaleTimeString());
+  save();render();
+};
+
+setInterval(()=>{
+  const mins=Math.floor((Date.now()-state.start)/60000);
+  document.getElementById('timer').innerText=mins+' min';
+},1000);
+
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById(b.dataset.tab).classList.add('active');
+    document.getElementById('title').innerText=b.innerText;
+  }
+});
+
+function reset(){localStorage.removeItem('nosmoke');location.reload()}
+render();
 </script>
-
 </body>
 </html>
