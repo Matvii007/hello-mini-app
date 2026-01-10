@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-
-  <!-- КРИТИЧНО ДЛЯ iPHONE -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-  <title>Hello Mini App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mini Tracker</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -14,38 +11,136 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
       height: 100%;
-      background-color: #ffffff;
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      color: #000;
     }
 
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .app {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-      font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-      font-size: 32px;
-      color: #000000;
+    h1 {
+      margin: 0 0 10px;
+      font-size: 26px;
+    }
+
+    .status {
+      margin: 15px 0;
+      font-size: 18px;
+    }
+
+    .counter {
+      font-size: 40px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #007aff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:active {
+      opacity: 0.85;
+    }
+
+    .chart {
+      margin-top: 30px;
+    }
+
+    .bar {
+      height: 16px;
+      background: #007aff;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .label {
+      font-size: 14px;
+      margin-bottom: 4px;
     }
   </style>
 </head>
 <body>
 
-  <div id="app">Hello</div>
+  <div class="app">
+    <h1>Daily Tracker</h1>
+
+    <div class="status">Times today:</div>
+    <div class="counter" id="count">0</div>
+
+    <button id="btn">I feel an urge</button>
+
+    <div class="chart">
+      <h2 style="font-size:18px;">Today activity</h2>
+      <div id="bars"></div>
+    </div>
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
-
-    // КРИТИЧНО ДЛЯ iOS
     tg.ready();
-
-    // ЯВНО ГОВОРИМ TELEGRAM'У, ЧТО ФОН БЕЛЫЙ
+    tg.expand();
     tg.setBackgroundColor('#ffffff');
     tg.setHeaderColor('#ffffff');
 
-    // РАЗВОРАЧИВАЕМ MINI APP
-    tg.expand();
+    const STORAGE_KEY = 'daily_events';
+
+    function getData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function today() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function render() {
+      const data = getData().filter(d => d.date === today());
+      document.getElementById('count').innerText = data.length;
+
+      const bars = document.getElementById('bars');
+      bars.innerHTML = '';
+
+      data.forEach((item, index) => {
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.innerText = item.time;
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.width = Math.min(100, 20 + index * 10) + '%';
+
+        bars.appendChild(label);
+        bars.appendChild(bar);
+      });
+    }
+
+    document.getElementById('btn').addEventListener('click', () => {
+      const data = getData();
+      data.push({
+        date: today(),
+        time: new Date().toLocaleTimeString()
+      });
+      saveData(data);
+      render();
+    });
+
+    render();
   </script>
 
 </body>
