@@ -1,34 +1,90 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* NoSmoke App Styles */
+
+/* Timer display */
+.timer-display {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Panic button animation */
+.panic-button {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.panic-button:hover {
+  transform: scale(1.02);
 }
 
-.App-link {
-    color: #61dafb;
+.panic-button:active {
+  transform: scale(0.98);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Card hover effects */
+.card-hover {
+  transition: border-color 0.3s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  border-color: hsl(160 84% 39% / 0.3);
+  transform: translateY(-2px);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Chart container */
+.chart-container {
+  aspect-ratio: 16 / 9;
+}
+
+/* Mobile-first container */
+.app-container {
+  width: 100%;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Progress ring */
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Streak badge */
+.streak-badge {
+  background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(32 95% 44%) 100%);
+}
+
+/* Premium badge */
+.premium-badge {
+  background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(280 87% 65%) 100%);
 }
